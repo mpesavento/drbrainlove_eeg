@@ -62,15 +62,24 @@ handles.output = hObject;
 % name_match=strfind(upper( fig_names), 'BCILAB');
 % if  ( iscell(name_match) && all(cellfun(@isempty, name_match)) ) || isempty(name_match)
 if ~exist('env_startup.m','file')
-    cd('C:\Users\mpesavento\src\BCILAB\');
-    %     bcilab('menu',false); %start the gui
-    bcilab; %start the gui
+    cd('C:\DrBrainlove_eeg\BCILAB\');
+    bcilab('menu',false); %start the gui
+%     bcilab; %start the gui
 end
 
 
-handles.chanloc_file = 'C:\Users\mpesavento\src\DrBrainlove_eeg\data\cognionics16ch.locs';
+handles.chanloc_file = 'C:\DrBrainlove_eeg\DrBrainlove_eeg\data\cognionics16ch.locs';
 set(handles.edit_chanfile,'string',handles.chanloc_file,...
     'horizontalalignment','right');
+
+%set the default display file
+handles.datafile_default = 'C:\DrBrainlove_eeg\DrBrainlove_eeg\data\cognionics16ch_matt\matt test 8 7 14.vhdr';
+set(handles.edit_dataset,'string',handles.datafile_default,...
+    'horizontalalignment','right');
+
+set(handles.edit_oscip,'string','10.0.0.101');
+%ip for sean's comp
+%10.0.0.101
 
 hax = handles.axis_topo;
 set(hax,'XTickLabel',[]);
@@ -145,6 +154,7 @@ if isempty(runstate) || runstate == 0 % want to start running
     conf.chunk_fs = str2double(get(handles.edit_updaterate,'string'));
     conf.data_fs = 100; %downsample from 300
     conf.bandpass = [ 5 6 45 47];
+    
 
     %%% set up OSC
     osc_target.address = get(handles.edit_oscip,'string');
@@ -187,6 +197,7 @@ if isempty(runstate) || runstate == 0 % want to start running
     else
     end
     set(handles.txt_status,'string','Starting the stream');
+    drawnow;
 
     %%% set up the streams
     switch streamsource
@@ -197,10 +208,10 @@ if isempty(runstate) || runstate == 0 % want to start running
             nchan_target=16;
 
             fprintf('collecting calib data\n');
-            set(handles.txt_status, 'Collecting calibration data, wait 60 sec');
+            set(handles.txt_status,'string', 'Collecting calibration data, wait 60 sec');
             pause(60); %collect calib data
             fprintf('moving on\n');
-            set(handles.txt_status, 'Calibrated.');
+            set(handles.txt_status, 'string', 'Calibrated.');
 
         case 2 %load prerecorded data
             set(handles.txt_status,'String', 'Loading dataset...');
@@ -243,12 +254,15 @@ if isempty(runstate) || runstate == 0 % want to start running
     conf.oscconn = osc_new_address(osc_target.address, osc_target.port);
     conf.msg_formatter = @(D) num2cell(single(D(:)));
 
+    conf.chanlocs = chanlocs_cogn; %pas in the cognionics channel locations
+
     conf.cc=0; %call count
 
     recurz; %initialize z-transform
 
     fprintf('Running stream...\n');
     set(handles.txt_status, 'String','Running stream');
+    drawnow;
 
     while 1
         [chunk, mypipe] = onl_filtered(mypipe); %extract anything that was appended since last call
@@ -441,9 +455,11 @@ switch newButton
     case 'radio_livestream'
         set(handles.txt_status,'string','Selected live stream');
         set(hObject,'userdata',1);
+        set(handles.panel_streamselect,'userdata',1)
     case 'radio_recordstream'
         set(handles.txt_status,'string','Selected recorded stream');
         set(hObject,'userdata',2)
+        set(handles.panel_streamselect,'userdata',2)
 end
 
 

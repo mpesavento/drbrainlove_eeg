@@ -8,18 +8,19 @@ fig_names = get( get(0,'Children'),'name');
 name_match=strfind(upper( fig_names), 'BCILAB');
 a = findobj(get(0,'Children'),'name','BCILAB');
 if  ( iscell(name_match) && all(cellfun(@isempty, name_match)) ) || isempty(name_match)
-    cd('C:\Users\mpesavento\src\BCILAB\');
-    bcilab('menu',false); %start the gui
+    cd('C:\DrBrainlove_eeg\BCILAB');
+%     bcilab('menu',false); %start the gui
+    bcilab
 end
 deleter = onCleanup(@()onl_clear());
 
 %%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-datapath = 'C:\Users\mpesavento\src\BCILAB\userdata\cognionics16ch_matt';
+datapath = 'C:\DrBrainlove_eeg\DrBrainlove_eeg\data\';
 chanlocfile = 'cognionics16ch.locs';
 
-runlive = 0; 
+runlive = 1; 
 
 target_Fs=100; %samples/sec
 chunk_Fs=5; % updates/sec
@@ -45,7 +46,7 @@ if runlive
 else
     
 %     filename = 'data:/tutorial/imag_movements1/calib/DanielS001R01.dat';
-    filename = 'data:/cognionics16ch_matt/matt test 8 7 14.vhdr';
+    filename = 'C:\DrBrainlove_eeg\DrBrainlove_eeg\data\matt test 8 7 14.vhdr';
 
     chanlocs_cogn = readlocs(fullfile(datapath, chanlocfile))';
     
@@ -219,6 +220,7 @@ while 1 %&& cc<1000
 
     [chunk, mypipe] = onl_filtered(mypipe); %extract anything that was appended since last call
     cc=cc+1;
+    chunk.chanlocs=chanlocs_cogn;
     
     if all(size(chunk.data)~= 0 )
         mean_data = mean(chunk.data,2);

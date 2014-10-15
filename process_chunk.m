@@ -1,7 +1,9 @@
 function process_chunk(chunk, conf)
 % given a eeglab style struct, process that chunk
 
-
+if isempty(chunk.chanlocs(1).theta)
+    chunk.chanlocs = conf.chanlocs;
+end
 
 mean_data = mean(chunk.data,2);
 activity = std(chunk.data,[],2); %look at RMS? activity by channel
